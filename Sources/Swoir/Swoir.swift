@@ -41,6 +41,7 @@ public indirect enum ABI_ParameterType: Codable {
     case kindField(kind: String)
     case kindString(kind: String, length: Int)
     case kindStruct(kind: String, path: String, fields: [ABI_Parameter])
+    case kindBoolean(kind: String) // NEW: Adding support for 'boolean'
 
     enum CodingKeys: CodingKey {
         case kind, sign, width, length, type, fields, path
@@ -60,6 +61,8 @@ public indirect enum ABI_ParameterType: Codable {
             self = .kindArray(kind: kind, length: length, type: type)
         case "field":
             self = .kindField(kind: kind)
+        case "boolean": // NEW: Support for boolean type
+            self = .kindBoolean(kind: kind)
         case "string":
             let length = try container.decode(Int.self, forKey: .length)
             self = .kindString(kind: kind, length: length)
@@ -92,6 +95,9 @@ public indirect enum ABI_ParameterType: Codable {
             try container.encode(kind, forKey: .kind)
             try container.encode(fields, forKey: .fields)
             try container.encode(path, forKey: .path)
+        case .kindBoolean(let kind): // NEW: Handle 'boolean' type
+            // Encode boolean details: just the kind
+            try container.encode(kind, forKey: .kind)
         }
     }
 }
@@ -102,6 +108,7 @@ public indirect enum Kind {
     case array(length: Int, type: ABI_ParameterType)
     case string(length: Int)
     case structType(fields: [ABI_Parameter])
+    case boolean // NEW: Add support for booleans
 }
 
 public enum SwoirError: Error {
@@ -127,11 +134,13 @@ public class Swoir {
     }
 
     public func createCircuit(manifest url: URL) throws -> Circuit {
+        print("Inside Create Circuit URL")
         let circuit = try Circuit(backend: self.backend, manifest: url)
         return circuit
     }
 
     public func createCircuit(manifest data: Data) throws -> Circuit {
+        print("Inside Create Circuit Data")
         let circuit = try Circuit(backend: self.backend, manifest: data)
         return circuit
     }

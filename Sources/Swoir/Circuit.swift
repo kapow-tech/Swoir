@@ -52,6 +52,7 @@ public class Circuit {
             throw SwoirError.srsNotSetup("SRS not setup. Call setupSrs() before proving.")
         }
         let witnessMap = try generateWitnessMap(inputs, self.manifest.abi.parameters)
+        print("winessMap \(witnessMap)")
         let proof = try backend.prove(bytecode: self.bytecode, witnessMap: witnessMap, proof_type: proof_type, num_points: num_points)
         return proof
     }
@@ -65,6 +66,8 @@ public class Circuit {
     }
 
     func inputToWitnessMapValue(_ input: Any) -> WitnessMapValue? {
+        print("Serializing input:", input)
+        
         if let input = input as? Int         { return WitnessMapValue(input) }
         else if let input = input as? Int8   { return WitnessMapValue(input) }
         else if let input = input as? UInt8  { return WitnessMapValue(input) }
@@ -115,6 +118,9 @@ public class Circuit {
             return length
         case .kindStruct(_, _, let fields):
             return fields.reduce(0) { $0 + computeTotalLengthOfArray($1.type) }
+        case .kindBoolean: // NEW: Handle boolean type
+            // A boolean takes 1 unit of length
+            return 1
         }
     }
 
@@ -161,6 +167,13 @@ public class Circuit {
                     throw SwoirError.invalidInput("Input \(param.name) must be an integer.")
                 }
                 witnessMap.append(input)
+            
+            // Added New
+            case .kindBoolean:
+                guard let boolValue = input as? Bool else {
+                    throw SwoirError.invalidInput("Input \(param.name) must be a boolean.")
+                }
+                witnessMap.append(boolValue ? 1 : 0)
 
             case .kindInteger:
                 guard let input = inputToWitnessMapValue(input as Any) else {
@@ -189,7 +202,6 @@ public class Circuit {
                 }
                 let fieldWitnessMap = try generateWitnessMap(input, fields)
                 witnessMap.append(contentsOf: fieldWitnessMap)
-
             }
         }
         return witnessMap
