@@ -14,10 +14,10 @@ let package = Package(
             targets: ["Swoir"]
         ),
         // Executable product
-        .executable(
-            name: "SwoirExecutable",
-            targets: ["SwoirExecutable"]
-        ),
+//        .executable(
+//            name: "SwoirExecutable",
+//            targets: ["SwoirExecutable"]
+//        ),
     ],
     dependencies: [
         .package(url: "https://github.com/Swoir/SwoirCore.git", exact: "0.5.0"),
@@ -28,10 +28,10 @@ let package = Package(
             name: "Swoir",
             dependencies: ["SwoirCore", "Swoirenberg"]),
             // Executable target
-        .executableTarget(
-            name: "SwoirExecutable",
-            dependencies: ["Swoir"]
-        ),
+//        .executableTarget(
+//            name: "SwoirExecutable",
+//            dependencies: ["Swoir"]
+//        ),
         .testTarget(
             name: "SwoirTests",
             dependencies: ["Swoir"],
